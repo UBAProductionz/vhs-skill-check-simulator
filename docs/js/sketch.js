@@ -6,6 +6,13 @@ window.addEventListener('click', function(e){
   }
 });
 
+
+if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) && document.documentElement.clientWidth <= 810) {
+  document.getElementById("checkbox_auto_progress").checked = true;
+}
+
+
+
 new p5();
 
 let currentWindowWidth = windowWidth;
@@ -100,19 +107,35 @@ function keyPressed() {
       image_result_hammer = image_hammer_great;
     }
   }
-
-
-  if (document.querySelector('#checkbox_crafting').checked && keyCode == 69) {
-    audio_crafting.setVolume(1);
-  }
-
 }
 
-function keyReleased(){
-  if (keyCode === 69){
-    audio_crafting.setVolume(0, 0.5);
-  }
 
+
+function touchStarted() {
+  if (skill_check_in_progress && !skill_check_ending) {
+    currentFrame = frameCount;
+    skill_check_ending = true;
+    target.playSound(skill_check_line.midPoint.x);
+    skill_check_line.setColor(target.skill_check_result);
+    
+    if (target.skill_check_result == "miss") {
+      result_text = "MISS!"
+      result_text_color = color(255, 0, 0);
+      image_result_hammer = image_hammer_miss;
+    }
+
+    else if (target.skill_check_result == "good") {
+      result_text = "GOOD!"
+      result_text_color = color(255);
+      image_result_hammer = image_hammer_good;
+    }
+
+    else if (target.skill_check_result == "great") {
+      result_text = "GREAT!"
+      result_text_color = color(0, 255, 0);
+      image_result_hammer = image_hammer_great;
+    }
+  }
 }
 
 
@@ -134,6 +157,20 @@ function draw() {
   background(0);
   translate(0, windowHeight/2);
   progress_bar.show();
+
+  if (document.querySelector('#checkbox_crafting').checked) {
+    if (keyIsDown(69) || document.querySelector('#checkbox_auto_progress').checked) {
+      audio_crafting.setVolume(1);
+    }
+
+    else {
+      audio_crafting.setVolume(0, 0.25);
+    }
+  }
+
+  else {
+    audio_crafting.setVolume(0);
+  }
 
   if (skill_check_in_progress) {
     target.show();
@@ -168,9 +205,9 @@ function draw() {
     result_text_color = color(255);
 
 
-    if (keyIsDown(69)) {
+    if (keyIsDown(69) || (document.querySelector('#checkbox_auto_progress').checked) && frameCount >= 30) {
       current_progress.increaseProgress();
-
+      
       rdm = int(random(1,200));
 
       if (rdm == 1) {
